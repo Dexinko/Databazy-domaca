@@ -1,0 +1,126 @@
+USE moja_databaza;
+
+
+-- Úloha 1 – INNER JOIN:
+-- Zadanie:
+-- Vypíšte názov výrobku a jeho dodávateľa.
+-- Zobrazte len výrobky drahšie ako 1 €.
+-- Výsledok zoraďte podľa názvu výrobku.
+
+SELECT p.nazov_tovaru,
+       d.nazov_dodavatela,
+       p.cena_eur
+FROM papiernictvo AS p
+INNER JOIN dodavatelia AS d
+    ON p.dodavatel_id = d.id
+WHERE p.cena_eur > 1
+ORDER BY p.nazov_tovaru ASC;
+
+
+-- Úloha 2 – LEFT JOIN:
+-- Zadanie:
+-- Vypíšte dodávateľov, ktorých názov obsahuje písmeno „s“,
+-- a výrobky, ktoré dodávajú.
+-- Zobrazte aj dodávateľov, ktorí nemajú priradený výrobok.
+-- Výsledok zoraďte podľa názvu dodávateľa a výrobku.
+
+SELECT d.nazov_dodavatela,
+       p.nazov_tovaru,
+       p.cena_eur
+FROM dodavatelia AS d
+LEFT JOIN papiernictvo AS p
+    ON d.id = p.dodavatel_id
+WHERE LOWER(d.nazov_dodavatela) LIKE '%s%'
+ORDER BY d.nazov_dodavatela ASC,
+         p.nazov_tovaru ASC;
+
+
+-- Úloha 3 – Spojenie troch tabuliek:
+-- Zadanie:
+-- Vypíšte názov výrobku, názov dodávateľa,
+-- dátum objednávky a objednané množstvo.
+-- Zobrazte objednávky s množstvom väčším ako 10 kusov.
+-- Výsledok zoraďte podľa množstva zostupne.
+
+
+SELECT p.nazov_tovaru,
+       d.nazov_dodavatela,
+       o.datum_objednavky,
+       o.mnozstvo
+FROM papiernictvo AS p
+INNER JOIN dodavatelia AS d
+    ON p.dodavatel_id = d.id
+INNER JOIN objednavky AS o
+    ON p.id = o.produkt_id
+WHERE o.mnozstvo > 10
+ORDER BY o.mnozstvo DESC,
+         o.datum_objednavky ASC;
+
+
+-- Úloha 4 – Simulácia FULL OUTER JOIN:
+-- Zadanie:
+-- Zobrazte všetkých dodávateľov a všetky výrobky,
+-- vrátane výrobkov, ktoré nemajú priradeného dodávateľa.
+-- Výsledok zoraďte podľa názvu dodávateľa a výrobku.
+--
+-- MySQL nepodporuje FULL OUTER JOIN priamo.
+-- Preto ho simulujeme pomocou LEFT JOIN, UNION a opačného LEFT JOIN.
+-- Druhá časť vyberie len výrobky bez zodpovedajúceho dodávateľa.
+
+SELECT d.nazov_dodavatela,
+       p.nazov_tovaru
+FROM dodavatelia AS d
+LEFT JOIN papiernictvo AS p
+    ON d.id = p.dodavatel_id
+
+UNION
+
+SELECT d.nazov_dodavatela,
+       p.nazov_tovaru
+FROM papiernictvo AS p
+LEFT JOIN dodavatelia AS d
+    ON p.dodavatel_id = d.id
+WHERE d.id IS NULL
+
+ORDER BY nazov_dodavatela ASC,
+         nazov_tovaru ASC;
+
+
+-- Úloha 5 – UNION:
+-- Spojte názvy výrobkov a názvy horských chát do jedného stĺpca.
+-- Výsledný stĺpec pomenujte nazov.
+-- Výsledok usporiadajte abecedne.
+
+SELECT nazov_tovaru AS nazov
+FROM papiernictvo
+
+UNION
+
+SELECT nazov_chaty AS nazov
+FROM horske_chaty
+
+ORDER BY nazov ASC;
+
+
+-- Úloha 6 – SELF JOIN:
+-- Zadanie:
+-- Nájdite dvojice rôznych výrobkov z rovnakej kategórie,
+-- pričom oba výrobky musia stáť viac ako 1 €.
+-- Každú dvojicu zobrazte iba raz.
+-- Výsledok zoraďte podľa kategórie a názvov výrobkov.
+
+SELECT p1.kategoria,
+       p1.nazov_tovaru AS vyrobok_1,
+       p2.nazov_tovaru AS vyrobok_2
+FROM papiernictvo AS p1
+INNER JOIN papiernictvo AS p2
+    ON p1.kategoria = p2.kategoria
+   AND p1.id < p2.id
+WHERE p1.cena_eur > 1
+  AND p2.cena_eur > 1
+ORDER BY p1.kategoria ASC,
+         vyrobok_1 ASC,
+         vyrobok_2 ASC;
+
+
+
