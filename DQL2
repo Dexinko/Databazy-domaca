@@ -1,0 +1,70 @@
+USE moja_databaza;
+
+-- Úloha 1 – Textová funkcia UPPER:
+-- Vypíšte názvy výrobkov veľkými písmenami a ich ceny.
+-- Zobrazte len výrobky drahšie ako 1 € a zoraďte podľa názvu
+-- prevedeného na veľké písmená.
+SELECT UPPER(nazov_tovaru) AS nazov_velkymi, cena_eur
+FROM papiernictvo
+WHERE cena_eur > 1
+ORDER BY UPPER(nazov_tovaru) ASC;
+
+
+-- Úloha 2 – Číselná funkcia ROUND:
+-- Vypíšte názov výrobku a cenu zaokrúhlenú na celé eurá.
+-- Zobrazte len výrobky, ktorých zaokrúhlená cena je aspoň 2 €.
+-- Výsledok zoraďte podľa zaokrúhlenej ceny.
+SELECT nazov_tovaru,
+       ROUND(cena_eur, 0) AS zaokruhlena_cena
+FROM papiernictvo
+WHERE ROUND(cena_eur, 0) >= 2
+ORDER BY ROUND(cena_eur, 0) ASC, nazov_tovaru ASC;
+
+
+-- Úloha 3 – Funkcia CHAR_LENGTH:
+-- Vypíšte názvy výrobkov a počet znakov v názve.
+-- Zobrazte názvy dlhšie ako 5 znakov a zoraďte od najdlhšieho.
+-- CHAR_LENGTH počíta znaky aj pri textoch s diakritikou.
+SELECT nazov_tovaru,
+       CHAR_LENGTH(nazov_tovaru) AS pocet_znakov
+FROM papiernictvo
+WHERE CHAR_LENGTH(nazov_tovaru) > 5
+ORDER BY CHAR_LENGTH(nazov_tovaru) DESC, nazov_tovaru ASC;
+
+
+-- Úloha 4 – Výpočet a ROUND:
+-- Vypíšte chaty s výškou aspoň 1500 m.
+-- Okrem výšky v metroch vypočítajte výšku v kilometroch
+-- zaokrúhlenú na dve desatinné miesta. Zoraďte zostupne podľa km.
+SELECT nazov_chaty, nadmorska_vyska_m,
+       ROUND(nadmorska_vyska_m / 1000, 2) AS vyska_km
+FROM horske_chaty
+WHERE nadmorska_vyska_m >= 1500
+ORDER BY ROUND(nadmorska_vyska_m / 1000, 2) DESC, nazov_chaty ASC;
+
+
+-- Úloha 5 – Textové funkcie LOWER a LIKE:
+-- Vypíšte názov chaty, pohorie a názov prevedený na malé písmená.
+-- Vyberte chaty, ktorých názov obsahuje text „chata“,
+-- a zoraďte ich podľa názvu bez ohľadu na veľkosť písmen.
+SELECT nazov_chaty, pohorie,
+       LOWER(nazov_chaty) AS nazov_malymi
+FROM horske_chaty
+WHERE LOWER(nazov_chaty) LIKE '%chata%'
+ORDER BY LOWER(nazov_chaty) ASC;
+
+
+-- Úloha 6 – Agregačné funkcie a GROUP BY/HAVING:
+-- Pre každú kategóriu vypočítajte počet výrobkov, priemernú
+-- a najvyššiu cenu. Započítajte iba výrobky drahšie ako 1 €.
+-- Zobrazte len kategórie s aspoň dvoma takými výrobkami.
+-- WHERE filtruje riadky pred zoskupením; HAVING filtruje skupiny.
+SELECT kategoria,
+       COUNT(*) AS pocet_vyrobkov,
+       ROUND(AVG(cena_eur), 2) AS priemerna_cena,
+       MAX(cena_eur) AS najvyssia_cena
+FROM papiernictvo
+WHERE cena_eur > 1
+GROUP BY kategoria
+HAVING COUNT(*) >= 2
+ORDER BY AVG(cena_eur) DESC, kategoria ASC;
